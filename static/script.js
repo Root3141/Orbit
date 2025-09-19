@@ -51,22 +51,31 @@ function stopSim() {
 }
 
 function drawBodies(bodies) {
-  ctx.fillStyle = "rgba(24, 24, 24, 0.2)";
+  ctx.fillStyle = "rgba(24, 24, 24, 1)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   bodies.forEach((body) => {
     const cx = canvas.width / 2 + body.x * scaleFactor;
     const cy = canvas.height / 2 + body.y * scaleFactor;
     ctx.beginPath();
-    ctx.arc(cx, cy, body.size/Math.sqrt(scaleFactor), 0, Math.PI * 2);
+    ctx.arc(cx, cy, body.size*Math.sqrt(scaleFactor), 0, Math.PI * 2);
     ctx.fillStyle = body.color;
     ctx.fill();
+
+    ctx.font = "14px Consolas";
+    ctx.fillStyle = "white";
+    ctx.textAlign = "center";
+    ctx.fillText(body.label, cx, cy - 10);
   });
 }
 
-document.getElementById("zoomOut").addEventListener("click", () => {
-  scaleFactor = Math.min(scaleFactor*1.2, 10);
+document.getElementById("zoomIn").addEventListener("click", () => {
+  if(scaleFactor<=10){
+    scaleFactor *= 1.2;
+  }
 });
 
-document.getElementById("zoomIn").addEventListener("click", () => {
-  scaleFactor = Math.min(scaleFactor/1.2, 0.001);
+document.getElementById("zoomOut").addEventListener("click", () => {
+  if(scaleFactor>=0.1){
+    scaleFactor /= 1.2;
+  }
 });

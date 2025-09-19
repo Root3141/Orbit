@@ -1,24 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Solar System Simulation</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+  <body>
     <div class="container">
-        <h1>Solar System Simulation</h1>
-        <button class="show">Start Simulation</button>
-        <div class="sim">
-            <canvas id="simCanvas" width="600" height="600"></canvas>
-            <div class="controls">
-                <button id="toggle">Pause/Play</button>
-                <button id="zoomOut">-</button>
-                <button id="zoomIn">+</button>
-            </div>
+      <h1>Solar System Simulation</h1>
+      <button class="show">Start Simulation</button>
+      <div class="sim">
+        <canvas id="simCanvas" width="800" height="600"></canvas>
+        <div class="controls">
+          <button id="toggle">Pause/Play</button>
+          <button id="zoomOut">-</button>
+          <button id="zoomIn">+</button>
         </div>
+      </div>
     </div>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
-</body>
+  </body>
 </html>

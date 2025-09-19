@@ -41,7 +41,7 @@ class SolarSystem:
 
 class Celestial_Body:
     def __init__(
-        self, solar_system, mass=0, size=0, position=(0, 0, 0), velocity=(0, 0, 0)
+        self, solar_system, mass=0, size=0, position=(0, 0, 0), velocity=(0, 0, 0), label = ""
     ):
         self.mass = mass
         self.size = size
@@ -51,6 +51,7 @@ class Celestial_Body:
         self.color = "black"
         self.solar_system.add_body(self)
         self.force = np.zeros(3)
+        self.label = label
 
     def move(self, dt=1):
         # update velocity and position using semi-implicit Euler method
@@ -76,9 +77,9 @@ class Celestial_Body:
 
 class Star(Celestial_Body):
     def __init__(
-        self, solar_system, mass=1000, size=50, position=(0, 0, 0), velocity=(0, 0, 0)
+        self, solar_system, mass=1000, size=50, position=(0, 0, 0), velocity=(0, 0, 0), label=""
     ):
-        super().__init__(solar_system, mass, size, position, velocity)
+        super().__init__(solar_system, mass, size, position, velocity, label)
         self.color = "orange"
 
 
@@ -91,16 +92,17 @@ class Planet(Celestial_Body):
         color="blue",
         position=(0, 0, 0),
         velocity=(0, 0, 0),
+        label = ""
     ):
-        super().__init__(solar_system, mass, size, position, velocity)
+        super().__init__(solar_system, mass, size, position, velocity, label)
         self.color = color
 
 
 def create_solar_system():
     solar_system = SolarSystem(400)
-    Star(solar_system, 1.989e30, 50, (0, 0, 0))
-    Planet(solar_system, 5.972e24, 5, "blue", (1.496e11, 0, 0), (0, 29780, 0))
-    Planet(solar_system, 6.39e23, 4, "red", (2.279e11, 0, 0), (0, 24070, 0))
+    Star(solar_system, 1.989e30, 50, (0, 0, 0), label="Sun")
+    Planet(solar_system, 5.972e24, 5, "#428bfe", (1.496e11, 0, 0), (0, 29780, 0), label = "Earth")
+    Planet(solar_system, 6.39e23, 4, "red", (2.279e11, 0, 0), (0, 24070, 0), label= "Mars")
     return solar_system
 
 
@@ -116,11 +118,12 @@ def coordinates(solar_system):
     for body in solar_system.bodies:
         bodies.append(
             {
-                "x": body.position[0] / 1e9,  # scale down for canvas
+                "x": body.position[0] / 1e9,
                 "y": body.position[1] / 1e9,
                 "z": body.position[2] / 1e9,
                 "size": body.size,
                 "color": body.color,
+                "label": body.label
             }
         )
     return bodies
