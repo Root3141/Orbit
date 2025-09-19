@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 
 G = 6.67e-11  # Gravitational Constant
 
+
 class SolarSystem:
     def __init__(self, size):
         self.size = size
@@ -94,12 +95,14 @@ class Planet(Celestial_Body):
         super().__init__(solar_system, mass, size, position, velocity)
         self.color = color
 
+
 def create_solar_system():
-    ss = SolarSystem()
-    Star(1.989e30, 50, (0,0,0))
-    Planet(5.972e24, 5, "blue", (1.496e11,0,0), (0,29780,0))
-    Planet(6.39e23, 4, "red", (2.279e11,0,0), (0,24070,0))
-    return ss
+    solar_system = SolarSystem(400)
+    Star(solar_system, 1.989e30, 50, (0, 0, 0))
+    Planet(solar_system, 5.972e24, 5, "blue", (1.496e11, 0, 0), (0, 29780, 0))
+    Planet(solar_system, 6.39e23, 4, "red", (2.279e11, 0, 0), (0, 24070, 0))
+    return solar_system
+
 
 def sim_step(solar_system, dt):
     for body in solar_system.bodies:
@@ -107,17 +110,21 @@ def sim_step(solar_system, dt):
     solar_system.interact()
     solar_system.move_all(dt)
 
+
 def coordinates(solar_system):
     bodies = []
     for body in solar_system.bodies:
-        bodies.append({
-            "x": body.position[0] / 1e9,  # scale down for canvas
-            "y": body.position[1] / 1e9,
-            "z": body.position[2] / 1e9,
-            "size": body.size,
-            "color": body.color
-        })
+        bodies.append(
+            {
+                "x": body.position[0] / 1e9,  # scale down for canvas
+                "y": body.position[1] / 1e9,
+                "z": body.position[2] / 1e9,
+                "size": body.size,
+                "color": body.color,
+            }
+        )
     return bodies
+
 
 def main():
     solar_system = create_solar_system()

@@ -4,10 +4,10 @@ const showBtn = document.querySelector(".show");
 const canvas = document.getElementById("simCanvas");
 const ctx = canvas.getContext("2d");
 
-let currScale = 600;
 let isPlaying = false;
 let interval = null;
-const FPS = 10;
+const FPS = 30;
+let scaleFactor = 1;
 
 showBtn.addEventListener("click", () => {
   showBtn.style.display = "none";
@@ -50,16 +50,23 @@ function stopSim() {
   }
 }
 
-
 function drawBodies(bodies) {
-  ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
+  ctx.fillStyle = "rgba(24, 24, 24, 0.2)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   bodies.forEach((body) => {
-    const cx = canvas.width / 2 + body.x;
-    const cy = canvas.height / 2 + body.y;
+    const cx = canvas.width / 2 + body.x * scaleFactor;
+    const cy = canvas.height / 2 + body.y * scaleFactor;
     ctx.beginPath();
-    ctx.arc(cx, cy, 0, Math.PI * 2);
+    ctx.arc(cx, cy, body.size/Math.sqrt(scaleFactor), 0, Math.PI * 2);
     ctx.fillStyle = body.color;
     ctx.fill();
   });
 }
+
+document.getElementById("zoomOut").addEventListener("click", () => {
+  scaleFactor = Math.min(scaleFactor*1.2, 10);
+});
+
+document.getElementById("zoomIn").addEventListener("click", () => {
+  scaleFactor = Math.min(scaleFactor/1.2, 0.001);
+});
