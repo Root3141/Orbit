@@ -12,13 +12,18 @@
   <body>
     <div class="container">
       <h1>Solar System Simulation</h1>
-      <button class="show">Start Simulation</button>
+      <div id="bodySelection">
+        <h2>Select Bodies:</h2>
+        <div id="bodyOptions"></div>
+        <button class="startSim">Start Simulation</button>
+      </div>
       <div class="sim">
-        <canvas id="simCanvas" width="800" height="600"></canvas>
+        <canvas id="simCanvas" width="800" height="800"></canvas>
         <div class="controls">
           <button id="toggle">Pause/Play</button>
           <button id="zoomOut">-</button>
           <button id="zoomIn">+</button>
+          <button id="toggleTrail">Show/Hide Trail</button>
         </div>
       </div>
     </div>

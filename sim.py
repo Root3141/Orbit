@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import json
 
 G = 6.67e-11  # Gravitational Constant
 
@@ -77,10 +78,10 @@ class Celestial_Body:
 
 class Star(Celestial_Body):
     def __init__(
-        self, solar_system, mass=1000, size=50, position=(0, 0, 0), velocity=(0, 0, 0), label=""
+        self, solar_system, mass=1000, size=50, position=(0, 0, 0), velocity=(0, 0, 0), label="", color = "orange"
     ):
         super().__init__(solar_system, mass, size, position, velocity, label)
-        self.color = "orange"
+        self.color = color
 
 
 class Planet(Celestial_Body):
@@ -98,11 +99,23 @@ class Planet(Celestial_Body):
         self.color = color
 
 
-def create_solar_system():
+def create_solar_system(include=None):
     solar_system = SolarSystem(400)
-    Star(solar_system, 1.989e30, 50, (0, 0, 0), label="Sun")
-    Planet(solar_system, 5.972e24, 5, "#428bfe", (1.496e11, 0, 0), (0, 29780, 0), label = "Earth")
-    Planet(solar_system, 6.39e23, 4, "red", (2.279e11, 0, 0), (0, 24070, 0), label= "Mars")
+    with open("static/bodies.json", 'r') as f:
+        bodies_data = json.load(f)
+        if(include):
+            bodies_data = [b for b in bodies_data if b["label"] in include]
+        for body in bodies_data:
+            cls = Star if body["type"] == "Star" else Planet
+            cls(
+                solar_system,
+                mass=body["mass"],
+                size=body["size"],
+                position=tuple(body["position"]),
+                velocity=tuple(body["velocity"]),
+                label=body["label"],
+                color=body["color"]
+            )
     return solar_system
 
 
@@ -115,12 +128,13 @@ def sim_step(solar_system, dt):
 
 def coordinates(solar_system):
     bodies = []
+    scale = 6.5e8
     for body in solar_system.bodies:
         bodies.append(
             {
-                "x": body.position[0] / 1e9,
-                "y": body.position[1] / 1e9,
-                "z": body.position[2] / 1e9,
+                "x": body.position[0] / scale,
+                "y": body.position[1] / scale,
+                "z": body.position[2] / scale,
                 "size": body.size,
                 "color": body.color,
                 "label": body.label
@@ -130,7 +144,7 @@ def coordinates(solar_system):
 
 
 def main():
-    solar_system = create_solar_system()
+    solar_system = create_solar_system(include=["Sun", "Earth", "Mars"])
     dt = 60 * 60 * 24
     while True:
         sim_step(solar_system, dt)
