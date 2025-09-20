@@ -9,7 +9,7 @@ let isPlaying = false;
 let interval = null;
 let scaleFactor = 1;
 let showTrails = false;
-const FPS = 30;
+const FPS = 10;
 const trails = {};
 const MAX_TRAIL_LENGTH = 1000;
 
