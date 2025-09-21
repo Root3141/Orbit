@@ -9,39 +9,60 @@ let isPlaying = false;
 let interval = null;
 let scaleFactor = 1;
 let showTrails = false;
-const FPS = 10;
+const FPS = 30;
 const trails = {};
 const MAX_TRAIL_LENGTH = 1000;
 
 let selectedBodies = [];
 
+function createRow(){
+  const row = document.createElement("div");
+  row.className = "cards-row";
+  return row; 
+}
+
 async function loadBodies() {
   const res = await fetch("static/bodies.json");
   const bodies = await res.json();
   const optionsDiv = document.getElementById("bodyOptions");
-  bodies.forEach((body, idx) => {
-    const label = document.createElement("label");
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.value = idx;
+  const sun = bodies.filter(b => b.label === "Sun");
+  const inner = bodies.filter(b => ["Mercury", "Venus", "Earth", "Mars"].includes(b.label));
+  const outer = bodies.filter(b => !["Sun", "Mercury", "Venus", "Earth", "Mars"].includes(b.label));
+  const groups = [sun, inner, outer];
 
-    checkbox.checked = ["Sun", "Earth", "Mars"].includes(body.label);
+  groups.forEach(group => {
+    const row = createRow();
+    group.forEach(body => {
+      const card = document.createElement("div");
+      card.className = "body-card";
+      card.dataset.label = body.label;
 
-    label.appendChild(checkbox);
-    label.appendChild(document.createTextNode(" " + body.label));
-    optionsDiv.appendChild(label);
-    optionsDiv.appendChild(document.createElement("br"));
-  });
-  selectedBodies = bodies.filter((b) =>
-    ["Sun", "Earth", "Mars"].includes(b.label)
-  );
-  optionsDiv.querySelectorAll("input").forEach((checkbox) => {
-    checkbox.addEventListener("change", () => {
-      selectedBodies = Array.from(
-        optionsDiv.querySelectorAll("input:checked")
-      ).map((i) => bodies[i.value]);
+      card.innerHTML = `
+        <img src="static/images/${body.label}.png" alt="${body.label}" />
+        <h3>${body.label}</h3>
+        <p>Mass: ${body.mass}</p>
+        <p>Radius: ${body.size}</p>
+        <p>Year Length: ${body.revolutionDays || "-"} days</p>
+      `;
+      if (["Sun", "Earth", "Mars"].includes(body.label)) {
+        card.classList.add("selected");
+      }
+      card.addEventListener("click", () => {
+        card.classList.toggle("selected");
+        updateSelectedBodies();
+      });
+
+      row.appendChild(card);
     });
-  });
+    optionsDiv.appendChild(row);
+  })
+
+  updateSelectedBodies();
+  function updateSelectedBodies() {
+    selectedBodies = Array.from(
+      optionsDiv.querySelectorAll(".body-card.selected")
+    ).map((c) => bodies.find((b) => b.label === c.dataset.label));
+  }
 }
 loadBodies();
 
