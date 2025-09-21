@@ -42,7 +42,7 @@ async function loadBodies() {
         <h3>${body.label}</h3>
         <p>Mass: ${body.mass}</p>
         <p>Radius: ${body.size}</p>
-        <p>Year Length: ${body.revolutionDays || "-"} days</p>
+        <p>Year Length: ${body.yearLen || "-"} days</p>
       `;
       if (["Sun", "Earth", "Mars"].includes(body.label)) {
         card.classList.add("selected");
