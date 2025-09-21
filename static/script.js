@@ -41,7 +41,7 @@ async function loadBodies() {
         <img src="static/images/${body.label}.png" alt="${body.label}" />
         <h3>${body.label}</h3>
         <p>Mass: ${body.mass}</p>
-        <p>Radius: "${body.radius}km"</p>
+        <p>Radius: ${body.radius} km</p>
         <p>Year Length: ${body.yearLen} days</p>
       `;
       if (["Sun", "Earth", "Mars"].includes(body.label)) {

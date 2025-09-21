@@ -8,7 +8,7 @@
     "position": [0, 0, 0],
     "velocity": [0, 0, 0],
     "yearLen": "-",
-    "radius": "696340"
+    "radius": 696340
   },
   {
     "type": "Planet",
@@ -19,7 +19,7 @@
     "position": [5.79e10, 0, 0],
     "velocity": [0, 47870, 0],
     "yearLen": 88,
-    "radius": "2439.7"
+    "radius": 2439.7
   },
   {
     "type": "Planet",
@@ -30,7 +30,7 @@
     "position": [1.082e11, 0, 0],
     "velocity": [0, 35020, 0],
     "yearLen": 224.7,
-    "radius": "6051.8"
+    "radius": 6051.8
   },
   {
     "type": "Planet",
@@ -41,7 +41,7 @@
     "position": [1.496e11, 0, 0],
     "velocity": [0, 29780, 0],
     "yearLen": 365.25,
-    "radius": "6371"
+    "radius": 6371
   },
   {
     "type": "Planet",
@@ -52,7 +52,7 @@
     "position": [2.279e11, 0, 0],
     "velocity": [0, 24070, 0],
     "yearLen": 687,
-    "radius": "3389.5"
+    "radius": 3389.5
   },
   {
     "type": "Planet",
@@ -63,7 +63,7 @@
     "position": [7.785e11, 0, 0],
     "velocity": [0, 13070, 0],
     "yearLen": 4333,
-    "radius": "69911"
+    "radius": 69911
   },
   {
     "type": "Planet",
@@ -74,7 +74,7 @@
     "position": [1.433e12, 0, 0],
     "velocity": [0, 9680, 0],
     "yearLen": 10759,
-    "radius": "58232"
+    "radius": 58232
   },
   {
     "type": "Planet",
@@ -85,7 +85,7 @@
     "position": [2.877e12, 0, 0],
     "velocity": [0, 6810, 0],
     "yearLen": 30687,
-    "radius": "25362"
+    "radius": 25362
   },
   {
     "type": "Planet",
@@ -96,6 +96,6 @@
     "position": [4.503e12, 0, 0],
     "velocity": [0, 5430, 0],
     "yearLen": 60190,
-    "radius": "24622"
+    "radius": 24622
   }
 ]
