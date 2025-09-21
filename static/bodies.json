@@ -7,7 +7,7 @@
     "color": "orange",
     "position": [0, 0, 0],
     "velocity": [0, 0, 0],
-    "yearLen": null
+    "yearLen": "-"
   },
   {
     "type": "Planet",
