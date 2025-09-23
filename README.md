@@ -1,96 +1,165 @@
-# 🌌 N-Body Orbit Simulation
+# Orbit2.0 🌌
 
-A modular, extensible orbital simulation engine—run it as a **classic Python/matplotlib animation** or as a **modern interactive web app** powered by Flask + HTML/JS.  
-**Both interfaces use the same NumPy-based simulation core for scientific consistency and maintainability.**
+A modular, minimalistic, and physically accurate orbital simulator.  
+Experience as a modern interactive web app or classic desktop Python/matplotlib animation. Powered by symplectic Velocity-Verlet integration, Flask, and vanilla JS.
+
 
 ---
 
-## 🚀 Overview
-
-Simulate the motion of celestial bodies (Sun, planets, etc.) using a semi-implicit Euler method and real astronomical data, loaded from `bodies.json`.  
-- **Two interfaces** from the same engine:
-  - 🖥️ Desktop: Matplotlib animation
-  - 🌐 Web: Flask API backend + HTML/JS/CSS canvas frontend
-- **Core logic is shared:** All interfaces call the same simulation code.
-
----
-
-## ✨ Features
-
-- Accurate N-body simulation (NumPy + OOP, semi-implicit Euler)
-- Select/deselect bodies with intuitive UI (checklist or cards)
-- Real-time animation with pause/play, zoom, and orbital trails
-- Fully responsive web design
-- Modular: Easily add or edit bodies in `bodies.json`
-- **Consistent scientific results on both desktop and web**
+## Table of Contents
+- [Overview](#overview)
+- [Features](#features)
+- [Architecture](#architecture)
+- [Quickstart](#quickstart)
+- [Editing or Adding Bodies](#editing-or-adding-bodies)
+- [What's New in 2.0](#whats-new-in-20)
+- [Design Philosophy](#design-philosophy)
+- [Educational Value](#educational-value)
+- [Future Work](#future-work)
+- [Screenshots / GIFs](#screenshots--gifs)
+- [Why Two Interfaces?](#why-two-interfaces)
+- [License](#license)
+- [Credits](#credits)
 
 ---
 
-## 🏗️ Architecture
+## Overview
 
-[bodies.json]
-|
-+----------------------+
-| simulation.py | <-- Shared simulation engine (NumPy, OOP)
-+----------------------+
-| |
-[matplotlib] [Flask API backend]
-|
-[JS/HTML5 Canvas frontend]
+Orbit2.0 simulates planetary and celestial motion using **energy-conserving Velocity-Verlet integration** for long-term orbital stability.
 
+**Experience it as:**
 
-Same simulation core powers both UI options.
+- 🖥️ **Desktop:** Python + Matplotlib animation – for research, teaching, or offline demos.  
+- 🌐 **Web:** Flask backend + HTML/JS/CSS frontend – modern interactive simulation.
+
+Both interfaces use the **same NumPy-based simulation core** for scientific consistency.
 
 ---
 
-## ⚡ Quickstart
+## Features
 
-### 1. Clone & Install
+### Physics Engine
+- Symplectic **Velocity-Verlet integration** (replaces semi-implicit Euler), numerically stable for long-term orbits.  
+- Planetary/body data stored in **editable `bodies.json`**.
 
-`git clone <your_repo_url>
-cd <repo>
-pip install -r requirements.txt`
+### Web / UI
+- Dynamic body selection via interactive cards.  
+- Real-time Canvas animation with **buffering and interpolation**.  
+- **Server-Sent Events (SSE)** for low-latency updates.  
+- Play/Pause toggle, zoom in/out, configurable trails, starry background, and auto pause on tab change.
 
-### 2. Run Desktop Version (matplotlib)
-`python sim.py`
+### Backend & Architecture
+- Modular OOP physics core (**simulation.py**).  
+- Flask backend serves snapshots to web; Matplotlib mode remains fully supported.
 
-### 3. Run Web Version (Flask + Web UI)
-`python app.py`
-or click [here](https://weborbitsim.onrender.com)
-
----
-
-## 🛠️ Editing or Adding Bodies
-
-All celestial body info is stored in [`bodies.json`](./bodies.json).  
-Add, remove, or edit planets/bodies—changes are reflected immediately in both UI modes.
-
----
-
-
-## 🌀 Project Evolution
-
-Started as a [matplotlib desktop animation](https://github.com/Root3141/Orbit),  
-now featuring a web app for modern, interactive exploration.  
-**Both interfaces use the same simulation code!**
+### Other
+- Fully responsive design for desktop & mobile.  
+- Clean separation of **code, data, and UI** for maintainability.  
+- MIT License.
 
 ---
 
-## ❓ Why Two Interfaces?
+## Quickstart
 
-- **Scientific repeatability:** Guarantee consistency by sharing the simulation code
-- **User reach:** Serve both notebook/script users (scientists, tinkerers) and general audiences (browser UI)
-- **Showcase growth:** Demonstrate full-stack and desktop skills in one project
+### Clone & Install
+```
+git clone https://github.com/yourusername/orbit2.0.git
+cd orbit2.0
+pip install -r requirements.txt
+```
+### Run Web App
+```
+python app.py
+```
+Open http://localhost:5000
+ or view the live demo [here](https://weborbitsim.onrender.com/)↗️.
+ 
+### Desktop (Matplotlib) Mode
+```
+python sim.py
+```
+## Architecture
+```
+   [bodies.json]
+        |
++---------------------+
+|   simulation.py     |  <-- Shared OOP simulation engine (NumPy + Verlet)
++---------------------+
+      |            |
+[Matplotlib]  [Flask backend/API]
+                   |
+             [HTML/JS frontend]
+```
+
+## Editing or Adding Bodies
+
+All celestial object data lives in **`bodies.json`**.  
+Add, remove, or edit entries - changes are reflected instantly in both interfaces.
 
 ---
 
-## 👤 Credits
+## What's New in 2.0
 
-Developed by [Aaryan Aaloke](https://github.com/Root3141).  
-Open-source, MIT licensed.
+| Feature       | v1.0                 | v2.0 (Current)                                  |
+|---------------|--------------------|------------------------------------------------|
+| Integration   | Semi-implicit Euler | Velocity-Verlet (energy-conserving, stable)  |
+| Data          | Hardcoded           | Fully editable JSON file                       |
+| Visualization | Matplotlib only     | Web (Canvas/SSE) + Matplotlib                 |
+| Architecture  | Flat script         | Modular, shared core, clean separation        |
+| UI/UX         | Static plots        | Modern, animated, interactive web UI          |
 
 ---
 
-## 📜 License
+## Design Philosophy
+
+**Simplicity without compromise:**  
+Minimal dependencies, clean architecture, clarity in purpose. Every feature is purposeful, and every UI element is functional and visually appealing.
+
+---
+
+## Educational Value
+
+Orbit2.0 is ideal for learning:
+
+- Numerical integration and stability  
+- Real-time web data streaming & buffering  
+- Software modularity and shared-core design  
+- Python + JS full-stack development
+
+---
+
+## Future Work
+
+- Modularize frontend JS/CSS for maintainability  
+- Expose user-configurable options (timestep, colors, trail memory)  
+- Expand `bodies.json` to include moons, comets, dwarf planets  
+- Optional: Web Workers / WebGL support for performance
+
+---
+
+## Screenshots / GIFs
+
+*(Insert Web App and Matplotlib output images or GIFs here.)*
+
+---
+
+## Why Two Interfaces?
+
+- **Scientific repeatability:** Same core logic in web & desktop  
+- **Broader audience:** Serves both research users and general learners  
+- **Skill showcase:** Demonstrates backend + modern frontend engineering
+
+---
+
+## License
 
 MIT
+
+---
+
+## Credits
+
+Developed by **[Aaryan Aaloke](https://github.com/Root3141)**  
+
+
+*Orbit2.0 demonstrates how minimal, well-crafted open-source software can deliver both scientific accuracy and engaging user experience.*
