@@ -9,12 +9,56 @@ let isPlaying = false;
 let interval = null;
 let scaleFactor = 1;
 let showTrails = false;
-const FPS = 18;
+const FPS = 30;
+const BUFFER_SIZE = 15;
 const trails = {};
 const MAX_TRAIL_LENGTH = 1000;
 
 let selectedBodies = [];
+let frameBuffer = [];
+let bufferInterval = null;
+let simTime = 0;
+const renderTime = 24*60*60;
 
+function drawInterpolated(){
+  if(frameBuffer.length < 2){
+    refillBuffer();
+    return;
+  }
+  let frame1 = null, frame2 = null;
+  for(let i=0; i<frameBuffer.length -1; i++){
+    if(frameBuffer[i].timestamp <= simTime && frameBuffer[i+1].timestamp >= simTime){
+      frame1 = frameBuffer[i];
+      frame2 = frameBuffer[i+1];
+      break;
+    }
+  }
+  if(!frame1 || !frame2) return;
+  const alpha = (simTime - frame1.timestamp) / (frame2.timestamp - frame1.timestamp);
+  const interpolated = frame1.bodies.map((body, idx) => {
+    const next = frame2.bodies[idx];
+    return {
+      ...body,
+      x: body.x + (next.x - body.x) * alpha,
+      y: body.y + (next.y - body.y) * alpha,
+    };
+  })
+  drawBodies(interpolated);
+  simTime += renderTime;
+  while(frameBuffer.length > 2 && frameBuffer[1].timestamp < simTime){
+    frameBuffer.shift();
+  }
+  if(frameBuffer.length < BUFFER_SIZE/3){
+    refillBuffer();
+  }
+}
+
+async function refillBuffer(){
+  if(frameBuffer.length > BUFFER_SIZE) return;
+  const res = await fetch(`/data?count=${BUFFER_SIZE - frameBuffer.length}`);
+  const frames = await res.json();
+  frameBuffer.push(...frames);
+}
 function createRow() {
   const row = document.createElement("div");
   row.className = "cards-row";
@@ -79,6 +123,7 @@ startSimBtn.addEventListener("click", async () => {
   document.getElementById("bodySelection").style.display = "none";
   simDiv.style.display = "block";
   setTimeout(() => simDiv.classList.add("show"), 50);
+  frameBuffer = [];
   startSim();
 });
 
@@ -108,17 +153,18 @@ async function update() {
 }
 
 function startSim() {
-  if (!interval) {
-    interval = setInterval(update, 1000 / FPS);
+  if (!bufferInterval) {
+    bufferInterval = setInterval(drawInterpolated, 1000 / FPS);
     isPlaying = true;
     toggleBtn.innerText = "Pause";
+    refillBuffer();
   }
 }
 
 function stopSim() {
-  if (interval) {
-    clearInterval(interval);
-    interval = null;
+  if (bufferInterval) {
+    clearInterval(bufferInterval);
+    bufferInterval = null;
     isPlaying = false;
     toggleBtn.innerText = "Play";
   }
