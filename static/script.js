@@ -5,36 +5,51 @@ const canvas = document.getElementById("simCanvas");
 const ctx = canvas.getContext("2d");
 const toggleTrail = document.getElementById("toggleTrail");
 
+let evtSource = null;
 let isPlaying = false;
-let interval = null;
 let scaleFactor = 1;
 let showTrails = false;
+let lastTime = 0;
 const FPS = 30;
-const BUFFER_SIZE = 15;
+const BUFFER_SIZE = 10;
 const trails = {};
 const MAX_TRAIL_LENGTH = 1000;
+const interval = 1000 / FPS;
 
 let selectedBodies = [];
 let frameBuffer = [];
 let bufferInterval = null;
 let simTime = 0;
-const renderTime = 24*60*60;
+const renderTime = 24 * 60 * 60;
 
-function drawInterpolated(){
-  if(frameBuffer.length < 2){
-    refillBuffer();
+function animate(now) {
+  const elapsed = now - lastTime;
+  if (elapsed >= interval) {
+    lastTime = now - (elapsed % interval);
+    if (isPlaying) drawInterpolated();
+  }
+  requestAnimationFrame(animate);
+}
+
+function drawInterpolated() {
+  if (frameBuffer.length < 2) {
     return;
   }
-  let frame1 = null, frame2 = null;
-  for(let i=0; i<frameBuffer.length -1; i++){
-    if(frameBuffer[i].timestamp <= simTime && frameBuffer[i+1].timestamp >= simTime){
+  let frame1 = null,
+    frame2 = null;
+  for (let i = 0; i < frameBuffer.length - 1; i++) {
+    if (
+      frameBuffer[i].timestamp <= simTime &&
+      frameBuffer[i + 1].timestamp >= simTime
+    ) {
       frame1 = frameBuffer[i];
-      frame2 = frameBuffer[i+1];
+      frame2 = frameBuffer[i + 1];
       break;
     }
   }
-  if(!frame1 || !frame2) return;
-  const alpha = (simTime - frame1.timestamp) / (frame2.timestamp - frame1.timestamp);
+  if (!frame1 || !frame2) return;
+  const alpha =
+    (simTime - frame1.timestamp) / (frame2.timestamp - frame1.timestamp);
   const interpolated = frame1.bodies.map((body, idx) => {
     const next = frame2.bodies[idx];
     return {
@@ -42,29 +57,25 @@ function drawInterpolated(){
       x: body.x + (next.x - body.x) * alpha,
       y: body.y + (next.y - body.y) * alpha,
     };
-  })
+  });
   drawBodies(interpolated);
   simTime += renderTime;
-  while(frameBuffer.length > 2 && frameBuffer[1].timestamp < simTime){
+  while (frameBuffer.length > 2 && frameBuffer[1].timestamp < simTime) {
     frameBuffer.shift();
-  }
-  if(frameBuffer.length < BUFFER_SIZE/3){
-    refillBuffer();
   }
 }
 
-async function refillBuffer(){
-  if(frameBuffer.length > BUFFER_SIZE) return;
+async function prefillBuffer() {
   const res = await fetch(`/data?count=${BUFFER_SIZE - frameBuffer.length}`);
   const frames = await res.json();
   frameBuffer.push(...frames);
 }
+
 function createRow() {
   const row = document.createElement("div");
   row.className = "cards-row";
   return row;
 }
-
 async function loadBodies() {
   const res = await fetch("static/bodies.json");
   const bodies = await res.json();
@@ -124,6 +135,7 @@ startSimBtn.addEventListener("click", async () => {
   simDiv.style.display = "block";
   setTimeout(() => simDiv.classList.add("show"), 50);
   frameBuffer = [];
+  await prefillBuffer();
   startSim();
 });
 
@@ -145,28 +157,31 @@ toggleTrail.addEventListener("click", (e) => {
   }
 });
 
-async function update() {
-  if (!isPlaying) return;
-  const res = await fetch("/data");
-  const bodies = await res.json();
-  drawBodies(bodies);
-}
-
 function startSim() {
-  if (!bufferInterval) {
-    bufferInterval = setInterval(drawInterpolated, 1000 / FPS);
+  if (!isPlaying) {
     isPlaying = true;
     toggleBtn.innerText = "Pause";
-    refillBuffer();
+    lastTime = performance.now();
+    if (!evtSource) {
+      evtSource = new EventSource("/stream");
+      evtSource.onmessage = (event) => {
+        const frame = JSON.parse(event.data);
+        frameBuffer.push(frame);
+      };
+      while(frameBuffer.length > BUFFER_SIZE) {
+        frameBuffer.shift();
+      }
+    }
+    requestAnimationFrame(animate);
   }
 }
 
 function stopSim() {
-  if (bufferInterval) {
-    clearInterval(bufferInterval);
-    bufferInterval = null;
-    isPlaying = false;
-    toggleBtn.innerText = "Play";
+  isPlaying = false;
+  toggleBtn.innerText = "Play";
+  if(evtSource) {
+    evtSource.close();
+    evtSource = null;
   }
 }
 

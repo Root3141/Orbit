@@ -1,5 +1,6 @@
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, Response
 from sim import create_solar_system, sim_step, coordinates, SolarSystem, Star, Planet
+import time, json
 
 app = Flask(__name__)
 
@@ -11,6 +12,22 @@ dt = 60 * 60 * 24
 def index():
     return render_template("index.html")
 
+@app.route("/stream")
+def stream():
+    global solar_system
+    if solar_system is None:
+        return jsonify({"error": "Simulation not initialized"}), 400
+    def event_stream():
+        while True:
+            sim_step(solar_system, dt)
+            frame = {
+                "timestamp": getattr(solar_system, "simTime", 0),
+                "bodies": coordinates(solar_system),
+            }
+            setattr(solar_system, "simTime", getattr(solar_system, "simTime", 0) + dt)
+            yield f"data: {json.dumps(frame)}\n\n"
+            time.sleep(1/30)
+    return Response(event_stream(), content_type="text/event-stream")
 
 @app.route("/data")
 def data():

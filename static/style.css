@@ -5,6 +5,11 @@ body {
   text-align: center;
   margin: 0;
   padding: 20px;
+  background-image: url("../static/images/background.jpg");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  overflow-x: hidden;
 }
 .container {
   display: inline-block;
