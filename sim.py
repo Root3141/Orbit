@@ -25,6 +25,13 @@ class SolarSystem:
     def move_all(self, dt=1):
         for body in self.bodies:
             body.move(dt)
+        for body in self.bodies:
+            body.force = np.zeros(3)
+        self.interact()
+        for body in self.bodies:
+            old_acc = body.acc.copy()
+            body.updateAcc()
+            body.velocity += 0.5 * (old_acc + body.acc) * dt
 
     def draw_all(self):
         max_size = self.size / 2
@@ -37,12 +44,18 @@ class SolarSystem:
         self.ax.set_ylim3d([-max_size, max_size])
         self.ax.set_zlim3d([-max_size, max_size])
         self.ax.axis("off")
-        plt.pause(0.01)
+        plt.pause(0.03)
 
 
 class Celestial_Body:
     def __init__(
-        self, solar_system, mass=0, size=0, position=(0, 0, 0), velocity=(0, 0, 0), label = ""
+        self,
+        solar_system,
+        mass=0,
+        size=0,
+        position=(0, 0, 0),
+        velocity=(0, 0, 0),
+        label="",
     ):
         self.mass = mass
         self.size = size
@@ -53,11 +66,10 @@ class Celestial_Body:
         self.solar_system.add_body(self)
         self.force = np.zeros(3)
         self.label = label
+        self.acc = np.zeros(3)
 
     def move(self, dt=1):
-        # update velocity and position using semi-implicit Euler method
-        self.velocity += (self.force / self.mass) * dt
-        self.position += self.velocity * dt
+        self.position += self.velocity * dt + 0.5 * (self.acc) * dt**2
 
     def draw(self):
         self.solar_system.ax.scatter(
@@ -69,16 +81,26 @@ class Celestial_Body:
         dist_mag = np.linalg.norm(dist)
         if dist_mag == 0:
             return
-        epsilon = 0
+        epsilon = 0  # Softening factor to avoid singularities
         force_mag = G * (self.mass * other.mass) / (dist_mag**2 + epsilon**2)
         force = dist * (force_mag / dist_mag)
         self.force = self.force + force
         other.force = other.force - force
 
+    def updateAcc(self):
+        self.acc = self.force / self.mass
+
 
 class Star(Celestial_Body):
     def __init__(
-        self, solar_system, mass=1000, size=50, position=(0, 0, 0), velocity=(0, 0, 0), label="", color = "orange"
+        self,
+        solar_system,
+        mass=1000,
+        size=50,
+        position=(0, 0, 0),
+        velocity=(0, 0, 0),
+        label="",
+        color="orange",
     ):
         super().__init__(solar_system, mass, size, position, velocity, label)
         self.color = color
@@ -93,7 +115,7 @@ class Planet(Celestial_Body):
         color="blue",
         position=(0, 0, 0),
         velocity=(0, 0, 0),
-        label = ""
+        label="",
     ):
         super().__init__(solar_system, mass, size, position, velocity, label)
         self.color = color
@@ -101,9 +123,9 @@ class Planet(Celestial_Body):
 
 def create_solar_system(include=None):
     solar_system = SolarSystem(400)
-    with open("static/bodies.json", 'r') as f:
+    with open("static/bodies.json", "r") as f:
         bodies_data = json.load(f)
-        if(include):
+        if include:
             bodies_data = [b for b in bodies_data if b["label"] in include]
         for body in bodies_data:
             cls = Star if body["type"] == "Star" else Planet
@@ -114,15 +136,12 @@ def create_solar_system(include=None):
                 position=tuple(body["position"]),
                 velocity=tuple(body["velocity"]),
                 label=body["label"],
-                color=body["color"]
+                color=body["color"],
             )
     return solar_system
 
 
 def sim_step(solar_system, dt):
-    for body in solar_system.bodies:
-        body.force = np.zeros(3)
-    solar_system.interact()
     solar_system.move_all(dt)
 
 
@@ -137,7 +156,7 @@ def coordinates(solar_system):
                 "z": body.position[2] / scale,
                 "size": body.size,
                 "color": body.color,
-                "label": body.label
+                "label": body.label,
             }
         )
     return bodies

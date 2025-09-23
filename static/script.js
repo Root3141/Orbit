@@ -15,24 +15,28 @@ const MAX_TRAIL_LENGTH = 1000;
 
 let selectedBodies = [];
 
-function createRow(){
+function createRow() {
   const row = document.createElement("div");
   row.className = "cards-row";
-  return row; 
+  return row;
 }
 
 async function loadBodies() {
   const res = await fetch("static/bodies.json");
   const bodies = await res.json();
   const optionsDiv = document.getElementById("bodyOptions");
-  const sun = bodies.filter(b => b.label === "Sun");
-  const inner = bodies.filter(b => ["Mercury", "Venus", "Earth", "Mars"].includes(b.label));
-  const outer = bodies.filter(b => !["Sun", "Mercury", "Venus", "Earth", "Mars"].includes(b.label));
+  const sun = bodies.filter((b) => b.label === "Sun");
+  const inner = bodies.filter((b) =>
+    ["Mercury", "Venus", "Earth", "Mars"].includes(b.label)
+  );
+  const outer = bodies.filter(
+    (b) => !["Sun", "Mercury", "Venus", "Earth", "Mars"].includes(b.label)
+  );
   const groups = [sun, inner, outer];
 
-  groups.forEach(group => {
+  groups.forEach((group) => {
     const row = createRow();
-    group.forEach(body => {
+    group.forEach((body) => {
       const card = document.createElement("div");
       card.className = "body-card";
       card.dataset.label = body.label;
@@ -55,7 +59,7 @@ async function loadBodies() {
       row.appendChild(card);
     });
     optionsDiv.appendChild(row);
-  })
+  });
 
   updateSelectedBodies();
   function updateSelectedBodies() {
@@ -66,11 +70,11 @@ async function loadBodies() {
 }
 loadBodies();
 
-startSimBtn.addEventListener("click", async() => {
-  await fetch('/init', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify(selectedBodies)
+startSimBtn.addEventListener("click", async () => {
+  await fetch("/init", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(selectedBodies),
   });
   document.getElementById("bodySelection").style.display = "none";
   simDiv.style.display = "block";
@@ -98,13 +102,9 @@ toggleTrail.addEventListener("click", (e) => {
 
 async function update() {
   if (!isPlaying) return;
-  try {
-    const res = await fetch("/data");
-    const bodies = await res.json();
-    drawBodies(bodies);
-  } catch (err) {
-    console.error("Error fetching data:", err);
-  }
+  const res = await fetch("/data");
+  const bodies = await res.json();
+  drawBodies(bodies);
 }
 
 function startSim() {
