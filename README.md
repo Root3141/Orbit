@@ -63,7 +63,7 @@ Both interfaces use the **same NumPy-based simulation core** for scientific cons
 
 ### Clone & Install
 ```
-git clone https://github.com/yourusername/orbit2.0.git
+git clone https://github.com/Root3141/orbit2.0.git
 cd orbit2.0
 pip install -r requirements.txt
 ```

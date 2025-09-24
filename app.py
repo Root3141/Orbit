@@ -28,7 +28,11 @@ def stream():
             yield f"data: {json.dumps(frame)}\n\n"
             yield f": keep-alive\n\n"
             time.sleep(1/30)
-    return Response(event_stream(), content_type="text/event-stream")
+    headers = {
+        "Cache-Control": "no-cache",
+        "X-Accel-Buffering": "no",
+    }
+    return Response(event_stream(), content_type="text/event-stream", headers=headers)
 
 @app.route("/data")
 def data():
