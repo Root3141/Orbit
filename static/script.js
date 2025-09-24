@@ -14,6 +14,7 @@ const BUFFER_SIZE = 10;
 const MAX_TRAIL_LENGTH = 1000;
 const interval = 1000 / FPS;
 const renderTime = 24 * 60 * 60;
+const trails = {};
 
 // Simulation state
 let evtSource = null;
@@ -23,8 +24,8 @@ let showTrails = false;
 let lastTime = 0;
 let frameBuffer = [];
 let simTime = 0;
-const trails = {};
 let selectedBodies = [];
+let pausedBufferPoll = null;
 
 // Simulation functions
 function animate(now) {
@@ -73,15 +74,16 @@ function drawInterpolated() {
 
   while (
     frameBuffer.length > 2 &&
-    (frameBuffer[1].timestamp < simTime ||
-      frameBuffer.length > 1.5 * BUFFER_SIZE)
+    (frameBuffer[1].timestamp < simTime || frameBuffer.length > BUFFER_SIZE)
   ) {
     frameBuffer.shift();
   }
 }
-
 async function prefillBuffer() {
-  const res = await fetch(`/data?count=${BUFFER_SIZE - frameBuffer.length}`);
+  frameBuffer = frameBuffer.filter((f) => f.timestamp >= simTime);
+  const res = await fetch(
+    `/data?count=${Math.max(0, BUFFER_SIZE - frameBuffer.length)}`
+  );
   const frames = await res.json();
   frameBuffer.push(...frames);
 }
@@ -121,11 +123,14 @@ function drawBodies(bodies) {
   });
 }
 
-function startSim() {
+async function startSim() {
   if (!isPlaying) {
     isPlaying = true;
     toggleBtn.innerText = "Pause";
     lastTime = performance.now();
+    const res = await fetch("play", { method: "POST" });
+    const data = await res.json();
+    simTime = data.simTime;
     if (!evtSource) {
       evtSource = new EventSource("/stream");
       evtSource.onmessage = (e) => frameBuffer.push(JSON.parse(e.data));
@@ -145,14 +150,10 @@ function startSim() {
 function stopSim() {
   isPlaying = false;
   toggleBtn.innerText = "Play";
-  if (evtSource) {
-    evtSource.close();
-    evtSource = null;
-  }
+  fetch("/pause", { method: "POST" });
 }
 
 // Loading celestial bodies
-
 function createRow() {
   const row = document.createElement("div");
   row.className = "cards-row";
@@ -243,7 +244,6 @@ zoomOutBtn.addEventListener("click", () => {
 document.addEventListener("visibilitychange", async () => {
   if (document.hidden) stopSim();
   else {
-    await prefillBuffer();
     startSim();
   }
 });
