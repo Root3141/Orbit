@@ -167,10 +167,16 @@ function startSim() {
       evtSource.onmessage = (event) => {
         const frame = JSON.parse(event.data);
         frameBuffer.push(frame);
+        while (frameBuffer.length > BUFFER_SIZE) frameBuffer.shift();
       };
-      while(frameBuffer.length > BUFFER_SIZE) {
-        frameBuffer.shift();
-      }
+      evtSource.onerror = (err) => {
+        console.warn("SSE disconnected, reconnecting...", err);
+        evtSource.close();
+        evtSource = null;
+        setTimeout(() => {
+          if (isPlaying) startSim();
+        }, 1000);
+      };
     }
     requestAnimationFrame(animate);
   }
@@ -179,7 +185,7 @@ function startSim() {
 function stopSim() {
   isPlaying = false;
   toggleBtn.innerText = "Play";
-  if(evtSource) {
+  if (evtSource) {
     evtSource.close();
     evtSource = null;
   }
