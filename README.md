@@ -1,5 +1,8 @@
 # Orbit2.0 🌌
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/)
+
 A modular, minimalistic, and physically accurate orbital simulator.  
 Experience as a modern interactive web app or classic desktop Python/matplotlib animation. Powered by symplectic Velocity-Verlet integration, Flask, and vanilla JS.
 

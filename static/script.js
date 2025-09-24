@@ -27,7 +27,6 @@ const trails = {};
 let selectedBodies = [];
 
 // Simulation functions
-
 function animate(now) {
   const elapsed = now - lastTime;
   if (elapsed >= interval) {
@@ -39,12 +38,18 @@ function animate(now) {
 
 function drawInterpolated() {
   if (frameBuffer.length < 2) return;
+  simTime = Math.min(
+    Math.max(simTime, frameBuffer[0].timestamp),
+    frameBuffer[frameBuffer.length - 1].timestamp
+  );
 
-  if (simTime < frameBuffer[0].timestamp) simTime = frameBuffer[0].timestamp;
-
-  let frame1 = null, frame2 = null;
+  let frame1 = null,
+    frame2 = null;
   for (let i = 0; i < frameBuffer.length - 1; i++) {
-    if (frameBuffer[i].timestamp <= simTime && frameBuffer[i + 1].timestamp >= simTime) {
+    if (
+      frameBuffer[i].timestamp <= simTime &&
+      frameBuffer[i + 1].timestamp >= simTime
+    ) {
       frame1 = frameBuffer[i];
       frame2 = frameBuffer[i + 1];
       break;
@@ -52,7 +57,8 @@ function drawInterpolated() {
   }
   if (!frame1 || !frame2) return;
 
-  const alpha = (simTime - frame1.timestamp) / (frame2.timestamp - frame1.timestamp);
+  const alpha =
+    (simTime - frame1.timestamp) / (frame2.timestamp - frame1.timestamp);
   const interpolated = frame1.bodies.map((body, idx) => {
     const next = frame2.bodies[idx];
     return {
@@ -65,7 +71,11 @@ function drawInterpolated() {
   drawBodies(interpolated);
   simTime += renderTime;
 
-  while (frameBuffer.length > 2 && (frameBuffer[1].timestamp < simTime || frameBuffer.length > BUFFER_SIZE)) {
+  while (
+    frameBuffer.length > 2 &&
+    (frameBuffer[1].timestamp < simTime ||
+      frameBuffer.length > 1.5 * BUFFER_SIZE)
+  ) {
     frameBuffer.shift();
   }
 }
@@ -80,17 +90,20 @@ function drawBodies(bodies) {
   ctx.fillStyle = "rgba(24, 24, 24, 1)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  bodies.forEach(body => {
+  bodies.forEach((body) => {
     const cx = canvas.width / 2 + body.x * scaleFactor;
     const cy = canvas.height / 2 + body.y * scaleFactor;
 
     if (showTrails) {
       if (!trails[body.label]) trails[body.label] = [];
       trails[body.label].push([cx, cy]);
-      if (trails[body.label].length > MAX_TRAIL_LENGTH) trails[body.label].shift();
+      if (trails[body.label].length > MAX_TRAIL_LENGTH)
+        trails[body.label].shift();
 
       ctx.beginPath();
-      trails[body.label].forEach(([tx, ty], idx) => idx === 0 ? ctx.moveTo(tx, ty) : ctx.lineTo(tx, ty));
+      trails[body.label].forEach(([tx, ty], idx) =>
+        idx === 0 ? ctx.moveTo(tx, ty) : ctx.lineTo(tx, ty)
+      );
       ctx.strokeStyle = body.color;
       ctx.lineWidth = 1;
       ctx.stroke();
@@ -113,11 +126,10 @@ function startSim() {
     isPlaying = true;
     toggleBtn.innerText = "Pause";
     lastTime = performance.now();
-
     if (!evtSource) {
       evtSource = new EventSource("/stream");
-      evtSource.onmessage = e => frameBuffer.push(JSON.parse(e.data));
-      evtSource.onerror = err => {
+      evtSource.onmessage = (e) => frameBuffer.push(JSON.parse(e.data));
+      evtSource.onerror = (err) => {
         if (!isPlaying) return;
         console.warn("SSE disconnected, reconnecting...", err);
         evtSource.close();
@@ -139,11 +151,6 @@ function stopSim() {
   }
 }
 
-function resetSim() {
-  frameBuffer = [];
-  simTime = 0;
-}
-
 // Loading celestial bodies
 
 function createRow() {
@@ -157,14 +164,18 @@ async function loadBodies() {
   const bodies = await res.json();
   const optionsDiv = document.getElementById("bodyOptions");
 
-  const sun = bodies.filter(b => b.label === "Sun");
-  const inner = bodies.filter(b => ["Mercury","Venus","Earth","Mars"].includes(b.label));
-  const outer = bodies.filter(b => !["Sun","Mercury","Venus","Earth","Mars"].includes(b.label));
+  const sun = bodies.filter((b) => b.label === "Sun");
+  const inner = bodies.filter((b) =>
+    ["Mercury", "Venus", "Earth", "Mars"].includes(b.label)
+  );
+  const outer = bodies.filter(
+    (b) => !["Sun", "Mercury", "Venus", "Earth", "Mars"].includes(b.label)
+  );
   const groups = [sun, inner, outer];
 
-  groups.forEach(group => {
+  groups.forEach((group) => {
     const row = createRow();
-    group.forEach(body => {
+    group.forEach((body) => {
       const card = document.createElement("div");
       card.className = "body-card";
       card.dataset.label = body.label;
@@ -175,7 +186,8 @@ async function loadBodies() {
         <p>Radius: ${body.radius} km</p>
         <p>Year Length: ${body.yearLen} days</p>
       `;
-      if (["Sun","Earth","Mars"].includes(body.label)) card.classList.add("selected");
+      if (["Sun", "Earth", "Mars"].includes(body.label))
+        card.classList.add("selected");
       card.addEventListener("click", () => {
         card.classList.toggle("selected");
         updateSelectedBodies();
@@ -188,8 +200,9 @@ async function loadBodies() {
   updateSelectedBodies();
 
   function updateSelectedBodies() {
-    selectedBodies = Array.from(optionsDiv.querySelectorAll(".body-card.selected"))
-      .map(c => bodies.find(b => b.label === c.dataset.label));
+    selectedBodies = Array.from(
+      optionsDiv.querySelectorAll(".body-card.selected")
+    ).map((c) => bodies.find((b) => b.label === c.dataset.label));
   }
 }
 
@@ -206,26 +219,30 @@ startSimBtn.addEventListener("click", async () => {
   document.getElementById("bodySelection").style.display = "none";
   simDiv.style.display = "block";
   setTimeout(() => simDiv.classList.add("show"), 50);
-  resetSim();
+  frameBuffer = [];
+  simTime = 0;
   await prefillBuffer();
   startSim();
 });
 
-toggleBtn.addEventListener("click", () => isPlaying ? stopSim() : startSim());
+toggleBtn.addEventListener("click", () => (isPlaying ? stopSim() : startSim()));
 
-toggleTrail.addEventListener("click", e => {
+toggleTrail.addEventListener("click", (e) => {
   showTrails = !showTrails;
   e.target.classList.toggle("active", showTrails);
-  if (!showTrails) Object.keys(trails).forEach(key => trails[key] = []);
+  if (!showTrails) Object.keys(trails).forEach((key) => (trails[key] = []));
 });
 
-zoomInBtn.addEventListener("click", () => { if (scaleFactor <= 10) scaleFactor *= 1.2; });
-zoomOutBtn.addEventListener("click", () => { if (scaleFactor >= 0.01) scaleFactor /= 1.2; });
+zoomInBtn.addEventListener("click", () => {
+  if (scaleFactor <= 10) scaleFactor *= 1.2;
+});
+zoomOutBtn.addEventListener("click", () => {
+  if (scaleFactor >= 0.01) scaleFactor /= 1.2;
+});
 
 document.addEventListener("visibilitychange", async () => {
   if (document.hidden) stopSim();
   else {
-    resetSim();
     await prefillBuffer();
     startSim();
   }
