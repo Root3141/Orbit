@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, render_template, request, Response
-from sim import create_solar_system, sim_step, coordinates, SolarSystem, Star, Planet
+from sim import create_solar_system, sim_step, coordinates
 import time, json
 
 app = Flask(__name__)
@@ -26,6 +26,7 @@ def stream():
             }
             setattr(solar_system, "simTime", getattr(solar_system, "simTime", 0) + dt)
             yield f"data: {json.dumps(frame)}\n\n"
+            yield f": keep-alive\n\n"
             time.sleep(1/30)
     return Response(event_stream(), content_type="text/event-stream")
 

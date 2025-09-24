@@ -35,6 +35,9 @@ function drawInterpolated() {
   if (frameBuffer.length < 2) {
     return;
   }
+  if (simTime < frameBuffer[0].timestamp) {
+    simTime = frameBuffer[0].timestamp;
+  }
   let frame1 = null,
     frame2 = null;
   for (let i = 0; i < frameBuffer.length - 1; i++) {
@@ -60,7 +63,7 @@ function drawInterpolated() {
   });
   drawBodies(interpolated);
   simTime += renderTime;
-  while (frameBuffer.length > 2 && frameBuffer[1].timestamp < simTime) {
+  while (frameBuffer.length > 2 && (frameBuffer[1].timestamp < simTime || frameBuffer.length > BUFFER_SIZE)) {
     frameBuffer.shift();
   }
 }
@@ -167,15 +170,13 @@ function startSim() {
       evtSource.onmessage = (event) => {
         const frame = JSON.parse(event.data);
         frameBuffer.push(frame);
-        while (frameBuffer.length > BUFFER_SIZE) frameBuffer.shift();
       };
       evtSource.onerror = (err) => {
+        if (!isPlaying) return;
         console.warn("SSE disconnected, reconnecting...", err);
         evtSource.close();
         evtSource = null;
-        setTimeout(() => {
-          if (isPlaying) startSim();
-        }, 1000);
+        setTimeout(startSim, 1000);
       };
     }
     requestAnimationFrame(animate);
@@ -237,3 +238,13 @@ document.getElementById("zoomOut").addEventListener("click", () => {
     scaleFactor /= 1.2;
   }
 });
+document.addEventListener("visibilitychange", async () => {
+  if (document.hidden) {
+    stopSim();
+  } else {
+    frameBuffer = [];
+    simTime = 0;
+    await prefillBuffer();
+    startSim();
+  }
+})
