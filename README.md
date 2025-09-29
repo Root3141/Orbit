@@ -58,7 +58,7 @@ Both interfaces use the **same NumPy-based simulation core** for scientific cons
 ### Other
 - Fully responsive design for desktop & mobile.  
 - Clean separation of **code, data, and UI** for maintainability.  
-- MIT License.
+- Open-source.
 
 ---
 
@@ -66,8 +66,8 @@ Both interfaces use the **same NumPy-based simulation core** for scientific cons
 
 ### Clone & Install
 ```
-git clone https://github.com/Root3141/orbit2.0.git
-cd orbit2.0
+git clone https://github.com/Root3141/Orbit.git
+cd Orbit
 pip install -r requirements.txt
 ```
 ### Run Web App
@@ -75,7 +75,7 @@ pip install -r requirements.txt
 python app.py
 ```
 Open http://localhost:5000
- or view the live demo [here](https://weborbitsim.onrender.com/)↗️.
+ or view the live demo [here](https://weborbitsim.onrender.com/)↗.
  
 ### Desktop (Matplotlib) Mode
 ```
@@ -137,12 +137,15 @@ Orbit2.0 is ideal for learning:
 - Expose user-configurable options (timestep, colors, trail memory)  
 - Expand `bodies.json` to include moons, comets, dwarf planets  
 - Optional: Web Workers / WebGL support for performance
+- Add multi-user support
 
 ---
 
 ## Screenshots / GIFs
 
-*(Insert Web App and Matplotlib output images or GIFs here.)*
+![Web Interface](static/media/screenshot.png)
+![Demo](static/media/demo.gif)
+<img src="static/media/plot.png" alt="Matplotlib Interface" width="600"/>
 
 ---
 
@@ -163,6 +166,3 @@ MIT
 ## Credits
 
 Developed by **[Aaryan Aaloke](https://github.com/Root3141)**  
-
-
-*Orbit2.0 demonstrates how minimal, well-crafted open-source software can deliver both scientific accuracy and engaging user experience.*
