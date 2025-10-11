@@ -26,6 +26,7 @@ let frameBuffer = [];
 let simTime = 0;
 let selectedBodies = [];
 let pausedBufferPoll = null;
+let lastInterpolated = [];
 
 // Simulation functions
 function animate(now) {
@@ -68,6 +69,7 @@ function drawInterpolated() {
       y: body.y + (next.y - body.y) * alpha,
     };
   });
+  lastInterpolated = interpolated;
 
   drawBodies(interpolated);
   simTime += renderTime;
@@ -91,21 +93,25 @@ async function prefillBuffer() {
 function drawBodies(bodies) {
   ctx.fillStyle = "rgba(24, 24, 24, 1)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
+  const cxCenter = canvas.width / 2;
+  const cyCenter = canvas.height / 2;
 
   bodies.forEach((body) => {
-    const cx = canvas.width / 2 + body.x * scaleFactor;
-    const cy = canvas.height / 2 + body.y * scaleFactor;
+    const cx = cxCenter + body.x * scaleFactor;
+    const cy = cyCenter + body.y * scaleFactor;
 
     if (showTrails) {
       if (!trails[body.label]) trails[body.label] = [];
-      trails[body.label].push([cx, cy]);
+      trails[body.label].push([body.x, body.y]);
       if (trails[body.label].length > MAX_TRAIL_LENGTH)
         trails[body.label].shift();
 
       ctx.beginPath();
-      trails[body.label].forEach(([tx, ty], idx) =>
-        idx === 0 ? ctx.moveTo(tx, ty) : ctx.lineTo(tx, ty)
-      );
+      trails[body.label].forEach(([wx, wy], idx) => {
+        const tx = wx * scaleFactor + cxCenter;
+        const ty = wy * scaleFactor + cyCenter;
+        idx === 0 ? ctx.moveTo(tx, ty) : ctx.lineTo(tx, ty);
+      });
       ctx.strokeStyle = body.color;
       ctx.lineWidth = 1;
       ctx.stroke();
@@ -236,9 +242,11 @@ toggleTrail.addEventListener("click", (e) => {
 
 zoomInBtn.addEventListener("click", () => {
   if (scaleFactor <= 10) scaleFactor *= 1.2;
+  if(lastInterpolated.length) drawBodies(lastInterpolated);
 });
 zoomOutBtn.addEventListener("click", () => {
   if (scaleFactor >= 0.01) scaleFactor /= 1.2;
+  if(lastInterpolated.length) drawBodies(lastInterpolated);
 });
 
 document.addEventListener("visibilitychange", async () => {
