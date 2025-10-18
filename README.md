@@ -20,6 +20,7 @@ Experience as a modern interactive web app or classic desktop Python/matplotlib 
 - [Educational Value](#educational-value)
 - [Future Work](#future-work)
 - [Known Issues](#known-issues)
+- [Contributing](#contributing)
 - [License](#license)
 - [Credits](#credits)
 
@@ -27,12 +28,12 @@ Experience as a modern interactive web app or classic desktop Python/matplotlib 
 
 ## Overview
 
-Orbit2.0 simulates planetary and celestial motion using **energy-conserving Velocity-Verlet integration** for long-term orbital stability. It has been designed to maximize functionality through an elegant yet minimal design without compromising on performance or user experience.
+Orbit2.0 simulates orbital motion using **energy-conserving Velocity-Verlet integration** for long-term orbital stability. Built around a lightweight, performance-focused architecture designed for clarity, efficiency, and a seamless user experience while avoiding unnecessary complexity.
 
 **Experience it as:**
 
-- 🖥️ **Desktop:** Python + Matplotlib animation – for research, teaching, or offline demos.
-- 🌐 **Web:** Flask backend + HTML/JS/CSS frontend – modern interactive simulation.
+- 🖥️ **Desktop:** Python + Matplotlib animation (for research, teaching, or offline demos).
+- 🌐 **Web:** Flask backend + HTML/JS/CSS frontend (modern interactive simulation).
 
 Both interfaces use the **same NumPy-based simulation core** for scientific consistency.
 
@@ -169,6 +170,12 @@ Orbit2.0 is ideal for learning:
 ## Known Issues
 
 - On the deployed web version (Render), resuming a paused simulation may occasionally jump ahead instead of continuing from the pause point before proceeding smoothly. This does **not** occur when running locally, where it resumes as expected.
+
+---
+
+## Contributing
+Pull requests are welcome!  
+For major changes, please open an issue first to discuss what you’d like to improve.
 
 ## License
 
