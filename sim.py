@@ -56,13 +56,14 @@ class Celestial_Body:
         position=(0, 0, 0),
         velocity=(0, 0, 0),
         label="",
+        color="black"
     ):
         self.mass = mass
         self.size = size
         self.position = np.array(position, dtype=float)
         self.velocity = np.array(velocity, dtype=float)
         self.solar_system = solar_system
-        self.color = "black"
+        self.color = color
         self.solar_system.add_body(self)
         self.force = np.zeros(3)
         self.label = label
@@ -102,8 +103,7 @@ class Star(Celestial_Body):
         label="",
         color="orange",
     ):
-        super().__init__(solar_system, mass, size, position, velocity, label)
-        self.color = color
+        super().__init__(solar_system, mass, size, position, velocity, label, color)
 
 
 class Planet(Celestial_Body):
@@ -117,8 +117,7 @@ class Planet(Celestial_Body):
         velocity=(0, 0, 0),
         label="",
     ):
-        super().__init__(solar_system, mass, size, position, velocity, label)
-        self.color = color
+        super().__init__(solar_system, mass, size, position, velocity, label, color)
 
 
 def create_solar_system(include=None):
@@ -128,7 +127,12 @@ def create_solar_system(include=None):
         if include:
             bodies_data = [b for b in bodies_data if b["label"] in include]
         for body in bodies_data:
-            cls = Star if body["type"] == "Star" else Planet
+            if body["type"]=="Star":
+                cls = Star
+            elif body["type"]=="Planet":
+                cls = Planet
+            else:
+                cls = Celestial_Body
             cls(
                 solar_system,
                 mass=body["mass"],
