@@ -1,10 +1,12 @@
 // DOM references
-const toggleBtn = document.getElementById("toggle");
-const toggleTrail = document.getElementById("toggleTrail");
-const simDiv = document.querySelector(".sim");
-const startSimBtn = document.querySelector(".startSim");
+const backBtn = document.getElementById("backBtn");
+const bodySelectionDiv = document.getElementById("bodySelection");
 const canvas = document.getElementById("simCanvas");
 const ctx = canvas.getContext("2d");
+const simDiv = document.querySelector(".sim");
+const startSimBtn = document.querySelector(".startSim");
+const toggleBtn = document.getElementById("toggle");
+const toggleTrail = document.getElementById("toggleTrail");
 const zoomInBtn = document.getElementById("zoomIn");
 const zoomOutBtn = document.getElementById("zoomOut");
 
@@ -89,7 +91,22 @@ async function prefillBuffer() {
   const frames = await res.json();
   frameBuffer.push(...frames);
 }
+function drawTrail(body, cxCenter, cyCenter) {
+  if (!showTrails) return;
+  if (!trails[body.label]) trails[body.label] = [];
+  trails[body.label].push([body.x, body.y]);
+  if (trails[body.label].length > MAX_TRAIL_LENGTH) trails[body.label].shift();
 
+  ctx.beginPath();
+  trails[body.label].forEach(([wx, wy], idx) => {
+    const tx = wx * scaleFactor + cxCenter;
+    const ty = wy * scaleFactor + cyCenter;
+    idx === 0 ? ctx.moveTo(tx, ty) : ctx.lineTo(tx, ty);
+  });
+  ctx.strokeStyle = body.color;
+  ctx.lineWidth = 1;
+  ctx.stroke();
+}
 function drawBodies(bodies) {
   ctx.fillStyle = "rgba(24, 24, 24, 1)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -100,22 +117,7 @@ function drawBodies(bodies) {
     const cx = cxCenter + body.x * scaleFactor;
     const cy = cyCenter + body.y * scaleFactor;
 
-    if (showTrails) {
-      if (!trails[body.label]) trails[body.label] = [];
-      trails[body.label].push([body.x, body.y]);
-      if (trails[body.label].length > MAX_TRAIL_LENGTH)
-        trails[body.label].shift();
-
-      ctx.beginPath();
-      trails[body.label].forEach(([wx, wy], idx) => {
-        const tx = wx * scaleFactor + cxCenter;
-        const ty = wy * scaleFactor + cyCenter;
-        idx === 0 ? ctx.moveTo(tx, ty) : ctx.lineTo(tx, ty);
-      });
-      ctx.strokeStyle = body.color;
-      ctx.lineWidth = 1;
-      ctx.stroke();
-    }
+    drawTrail(body, cxCenter, cyCenter);
 
     ctx.beginPath();
     ctx.arc(cx, cy, body.size * Math.sqrt(scaleFactor), 0, Math.PI * 2);
@@ -128,7 +130,20 @@ function drawBodies(bodies) {
     ctx.fillText(body.label, cx, cy - 10);
   });
 }
-
+function createEventSource() {
+  if (evtSource) return;
+  evtSource = new EventSource("/stream");
+  evtSource.onmessage = (e) => frameBuffer.push(JSON.parse(e.data));
+  evtSource.onerror = (err) => {
+    if (!isPlaying) return;
+    console.warn("SSE disconnected, reconnecting...", err);
+    try {
+      evtSource.close();
+    } catch {}
+    evtSource = null;
+    setTimeout(createEventSource, 1000);
+  };
+}
 async function startSim() {
   if (!isPlaying) {
     isPlaying = true;
@@ -137,18 +152,7 @@ async function startSim() {
     const res = await fetch("play", { method: "POST" });
     const data = await res.json();
     simTime = data.simTime;
-    if (!evtSource) {
-      evtSource = new EventSource("/stream");
-      evtSource.onmessage = (e) => frameBuffer.push(JSON.parse(e.data));
-      evtSource.onerror = (err) => {
-        if (!isPlaying) return;
-        console.warn("SSE disconnected, reconnecting...", err);
-        evtSource.close();
-        evtSource = null;
-        setTimeout(startSim, 1000);
-      };
-    }
-
+    createEventSource();
     requestAnimationFrame(animate);
   }
 }
@@ -223,7 +227,8 @@ startSimBtn.addEventListener("click", async () => {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(selectedBodies),
   });
-  document.getElementById("bodySelection").style.display = "none";
+  bodySelectionDiv.style.display = "none";
+  bodySelectionDiv.classList.add("hide");
   simDiv.style.display = "block";
   setTimeout(() => simDiv.classList.add("show"), 50);
   frameBuffer = [];
@@ -242,16 +247,43 @@ toggleTrail.addEventListener("click", (e) => {
 
 zoomInBtn.addEventListener("click", () => {
   if (scaleFactor <= 10) scaleFactor *= 1.2;
-  if(lastInterpolated.length) drawBodies(lastInterpolated);
+  if (lastInterpolated.length) drawBodies(lastInterpolated);
 });
 zoomOutBtn.addEventListener("click", () => {
   if (scaleFactor >= 0.01) scaleFactor /= 1.2;
-  if(lastInterpolated.length) drawBodies(lastInterpolated);
+  if (lastInterpolated.length) drawBodies(lastInterpolated);
 });
 
 document.addEventListener("visibilitychange", async () => {
   if (document.hidden) stopSim();
   else {
     startSim();
+  }
+});
+backBtn.addEventListener("click", () => {
+  simDiv.classList.remove("show");
+  simDiv.style.display = "none";
+  bodySelectionDiv.style.display = "block";
+  setTimeout(() => {
+    bodySelectionDiv.classList.remove("hide");
+  }, 50);
+  stopSim();
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  frameBuffer = [];
+  simTime = 0;
+  lastInterpolated = [];
+  scaleFactor = 1;
+  if (showTrails) {
+    showTrails = false;
+    toggleTrail.classList.remove("active");
+    Object.keys(trails).forEach((key) => (trails[key] = []));
+  }
+  if (evtSource) {
+    try {
+      evtSource.close();
+    } catch (err) {
+      console.warn("Error closing SSE:", err);
+    }
+    evtSource = null;
   }
 });

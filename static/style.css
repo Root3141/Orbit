@@ -28,6 +28,15 @@ body {
   opacity: 1;
   padding: 10px;
 }
+#bodySelection {
+  display: block;
+  opacity: 1;
+  transition: all 0.8s ease;
+}
+#bodySelection.hide {
+  display: none;
+  opacity: 0;
+}
 button {
   background-color: #001820;
   color: #00bfff;
@@ -57,12 +66,6 @@ button.active {
   align-items: center;
   gap: 15px;
   margin-top: 10px;
-}
-input[type="range"] {
-  width: 200px;
-  margin: 0 10px;
-  vertical-align: middle;
-  background-color: #00bfff;
 }
 .startSim {
   font-size: 22px;
@@ -137,4 +140,15 @@ input[type="range"] {
   flex-direction: row;
   gap: 25px;
   justify-content: center;
+}
+.back{
+  display: flex;
+  align-items: start;
+}
+#backBtn {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+  font-size: 18px;
+  border-radius: 8px;
 }
