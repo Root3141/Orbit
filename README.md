@@ -1,7 +1,7 @@
-# Orbit2.0 🌌
+# Orbit2.0 
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/)
+[![Python](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/)
 
 A modular, minimalistic, and physically accurate orbital simulator.  
 Experience as a modern interactive web app or classic desktop Python/matplotlib animation. Powered by symplectic Velocity-Verlet integration, Flask, and vanilla JS.
@@ -32,8 +32,8 @@ Orbit2.0 simulates orbital motion using **energy-conserving Velocity-Verlet inte
 
 **Experience it as:**
 
-- 🖥️ **Desktop:** Python + Matplotlib animation (for research, teaching, or offline demos).
-- 🌐 **Web:** Flask backend + HTML/JS/CSS frontend (modern interactive simulation).
+- **Desktop:** Python + 3D Matplotlib animation (for research, teaching, or offline demos).
+- **Web:** Flask backend + HTML/JS/CSS frontend (modern interactive 2D simulation).
 
 Both interfaces use the **same NumPy-based simulation core** for scientific consistency.
 
@@ -77,7 +77,7 @@ Both interfaces use the **same NumPy-based simulation core** for scientific cons
 
 ### Backend & Architecture
 
-- Modular OOP physics core (**simulation.py**).
+- Modular OOP physics core (**sim.py**).
 - Flask backend serves snapshots to web; Matplotlib mode remains fully supported.
 
 ### Other
@@ -119,7 +119,7 @@ python sim.py
    [bodies.json]
         |
 +---------------------+
-|   simulation.py     |  <-- Shared OOP simulation engine (NumPy + Verlet)
+|   simulation.py     |  <-- Shared simulation engine (NumPy + Verlet)
 +---------------------+
       |            |
 [Matplotlib]  [Flask backend/API]
