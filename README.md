@@ -17,7 +17,7 @@ Experience as a modern interactive web app or classic desktop Python/matplotlib 
 - [Quickstart](#quickstart)
 - [Editing or Adding Bodies](#editing-or-adding-bodies)
 - [What's New in 2.0](#whats-new-in-20)
-- [Educational Value](#educational-value)
+- [Numerical Analysis](#numerical-analysis)
 - [Future Work](#future-work)
 - [Known Issues](#known-issues)
 - [Contributing](#contributing)
@@ -147,14 +147,37 @@ Add, remove, or edit entries - changes are reflected instantly in both interface
 
 ---
 
-## Educational Value
+## Numerical Analysis
 
-Orbit2.0 is ideal for learning:
+In orbital simulation, small numerical errors may lead to long-term drift in energy and angular momentum, leading to orbits drifting off or causing false precession. To counter that, Orbit uses Velocity-Verlet integration which is a symplectic integration method (meaning it preserves the qualitative structure of the symplectic manifold, leading to bounded long-term errors in conserved quantities), resulting in bounded errors in energy and angular momentum rather than secular drift. To evaluate this, the engine was benchmarked against Euler and RK4 integrators.
 
-- Visualizes Newtonian mechanics and orbital dynamics.
-- Helps students experiment with orbital parameters and see real-time effects.
-- Encourages hands-on learning with minimal setup.
+### Energy Conservation
+While Velocity-Verlet remains closely bounded and oscillates around the initial energy state, the other methods exhibit secular drift.
 
+<p align="center">
+  <img src="static/media/energy_error.png" alt="Relative Energy Error" width="600"/>
+  <br>
+  <em>Log-scale plot of relative energy error</em>
+</p>
+
+### Angular Momentum Conservation
+By preserving the symmetry of the central force field, the Velocity-Verlet engine maintains angular momentum precision several orders of magnitude higher than standard integrators.
+<p align="center">
+  <img src="static/media/angular_momentum_error.png" alt="Relative Angular Momentum Error" width="600"/>
+  <br>
+  <em>Log-scale plot of relative angular momentum error</em>
+</p>
+
+### Phase Space
+Since Velocity-Verlet is symplectic, it preserves phase space volume, resulting in closed orbits in phase space over long simulations, while Euler catastrophically spirals and RK4 slowly drifts (despite higher computing costs).
+<p align="center">
+  <img src="static/media/phase_space.png" alt="Phase Space" width="600"/>
+  <br>
+  <em>Phase Space trajectory of Mars</em>
+</p>
+
+> [!TIP]
+> For further details, see the [analysis notebook](notebook/analysis.ipynb).
 ---
 
 ## Future Work
